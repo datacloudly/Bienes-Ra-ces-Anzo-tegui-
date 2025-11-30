@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="es">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienes Raíces Anzoátegui</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        .property-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .property-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            transform: scale(1.05);
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="min-h-full w-full">
+  <div class="w-full"><!-- Header -->
+   <header class="w-full hero-gradient text-white py-6 px-6 shadow-lg">
+    <div class="max-w-7xl mx-auto">
+     <div class="flex justify-between items-center mb-6">
+      <div>
+       <h1 id="site-title" class="text-4xl font-bold mb-2">Bienes Raíces Anzoátegui</h1>
+       <p id="tagline" class="text-xl opacity-90">Tu hogar ideal en el oriente venezolano</p>
+      </div>
+      <div class="text-right">
+       <p id="phone-number" class="text-lg mb-1">📞 +58 424 123 4567</p>
+       <p id="email-address" class="text-sm opacity-90">✉️ info@bienesraices.com</p>
+      </div>
+     </div><!-- City Filters -->
+     <div class="flex gap-3 flex-wrap"><button onclick="filterProperties('todos')" class="filter-btn active bg-white text-blue-900 px-6 py-3 rounded-full font-semibold shadow-md hover:shadow-lg" data-filter="todos"> Todas las Ciudades </button> <button onclick="filterProperties('lecheria')" class="filter-btn bg-blue-700 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-600 shadow-md" data-filter="lecheria"> Lechería </button> <button onclick="filterProperties('barcelona')" class="filter-btn bg-blue-700 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-600 shadow-md" data-filter="barcelona"> Barcelona </button> <button onclick="filterProperties('puertolacruz')" class="filter-btn bg-blue-700 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-600 shadow-md" data-filter="puertolacruz"> Puerto La Cruz </button>
+     </div>
+    </div>
+   </header><!-- Type Filters -->
+   <div class="w-full bg-gray-100 py-4 px-6">
+    <div class="max-w-7xl mx-auto flex gap-3 flex-wrap"><button onclick="filterType('todos')" class="filter-btn active bg-orange-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-orange-600 shadow-md" data-type="todos"> Todo </button> <button onclick="filterType('venta')" class="filter-btn bg-white text-gray-800 px-5 py-2 rounded-lg font-semibold hover:bg-gray-50 shadow-md border border-gray-200" data-type="venta"> En Venta </button> <button onclick="filterType('alquiler')" class="filter-btn bg-white text-gray-800 px-5 py-2 rounded-lg font-semibold hover:bg-gray-50 shadow-md border border-gray-200" data-type="alquiler"> En Alquiler </button>
+    </div>
+   </div><!-- Properties Grid -->
+   <main class="w-full py-8 px-6 bg-gray-50">
+    <div class="max-w-7xl mx-auto">
+     <div id="properties-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><!-- Properties will be rendered here -->
+     </div>
+     <div id="no-results" class="hidden text-center py-16">
+      <p class="text-2xl text-gray-500">No se encontraron propiedades</p>
+      <p class="text-gray-400 mt-2">Intenta con otros filtros</p>
+     </div>
+    </div>
+   </main><!-- Contact CTA -->
+   <section class="w-full bg-blue-900 text-white py-12 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+     <h2 class="text-3xl font-bold mb-4">¿Listo para encontrar tu hogar ideal?</h2>
+     <p class="text-xl mb-6 opacity-90">Contáctanos hoy y te ayudaremos a encontrar la propiedad perfecta</p><button id="contact-cta-btn" onclick="showContactInfo()" class="bg-orange-500 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-orange-600 shadow-lg transition-all"> Contáctanos </button>
+    </div>
+   </section><!-- Footer -->
+   <footer class="w-full bg-gray-900 text-white py-6 px-6">
+    <div class="max-w-7xl mx-auto text-center">
+     <p class="opacity-75">© 2024 Bienes Raíces Anzoátegui - Lechería, Barcelona, Puerto La Cruz</p>
+    </div>
+   </footer>
+  </div>
+  <script>
+        const defaultConfig = {
+            site_title: "Bienes Raíces Anzoátegui",
+            tagline: "Tu hogar ideal en el oriente venezolano",
+            phone_number: "+58 424 123 4567",
+            email_address: "info@bienesraices.com",
+            contact_button_text: "Contáctanos",
+            background_color: "#f9fafb",
+            primary_color: "#1e40af",
+            accent_color: "#f97316",
+            text_color: "#1f2937",
+            card_background: "#ffffff",
+            font_family: "system-ui",
+            font_size: 16
+        };
+
+        const properties = [
+            {
+                id: 1,
+                city: "lecheria",
+                type: "venta",
+                title: "Casa de Playa en Lechería",
+                price: "$180,000",
+                beds: 4,
+                baths: 3,
+                area: "250m²",
+                description: "Hermosa casa con vista al mar"
+            },
+            {
+                id: 2,
+                city: "lecheria",
+                type: "alquiler",
+                title: "Apartamento Moderno",
+                price: "$800/mes",
+                beds: 3,
+                baths: 2,
+                area: "120m²",
+                description: "Apartamento amueblado en zona exclusiva"
+            },
+            {
+                id: 3,
+                city: "barcelona",
+                type: "venta",
+                title: "Casa Familiar Barcelona",
+                price: "$150,000",
+                beds: 5,
+                baths: 3,
+                area: "300m²",
+                description: "Amplia casa en urbanización privada"
+            },
+            {
+                id: 4,
+                city: "barcelona",
+                type: "alquiler",
+                title: "Apartamento Céntrico",
+                price: "$600/mes",
+                beds: 2,
+                baths: 2,
+                area: "90m²",
+                description: "Cerca de comercios y avenidas principales"
+            },
+            {
+                id: 5,
+                city: "puertolacruz",
+                type: "venta",
+                title: "Penthouse Vista al Mar",
+                price: "$220,000",
+                beds: 4,
+                baths: 4,
+                area: "280m²",
+                description: "Lujo y comodidad con vista panorámica"
+            },
+            {
+                id: 6,
+                city: "puertolacruz",
+                type: "alquiler",
+                title: "Apartamento Turístico",
+                price: "$900/mes",
+                beds: 3,
+                baths: 2,
+                area: "140m²",
+                description: "Ideal para vacacionar, cerca del Paseo Colón"
+            },
+            {
+                id: 7,
+                city: "lecheria",
+                type: "venta",
+                title: "Villa de Lujo",
+                price: "$350,000",
+                beds: 6,
+                baths: 5,
+                area: "450m²",
+                description: "Villa exclusiva con piscina y jardín"
+            },
+            {
+                id: 8,
+                city: "barcelona",
+                type: "venta",
+                title: "Casa en Conjunto Residencial",
+                price: "$125,000",
+                beds: 3,
+                baths: 2,
+                area: "180m²",
+                description: "Seguridad 24/7 y áreas recreativas"
+            },
+            {
+                id: 9,
+                city: "puertolacruz",
+                type: "alquiler",
+                title: "Estudio Amueblado",
+                price: "$450/mes",
+                beds: 1,
+                baths: 1,
+                area: "55m²",
+                description: "Perfecto para profesionales"
+            }
+        ];
+
+        let currentCityFilter = 'todos';
+        let currentTypeFilter = 'todos';
+
+        function renderProperties() {
+            const grid = document.getElementById('properties-grid');
+            const noResults = document.getElementById('no-results');
+            
+            const filtered = properties.filter(prop => {
+                const cityMatch = currentCityFilter === 'todos' || prop.city === currentCityFilter;
+                const typeMatch = currentTypeFilter === 'todos' || prop.type === currentTypeFilter;
+                return cityMatch && typeMatch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            
+            const baseSize = window.elementSdk?.config?.font_size || defaultConfig.font_size;
+            const customFont = window.elementSdk?.config?.font_family || defaultConfig.font_family;
+            const baseFontStack = 'system-ui, -apple-system, sans-serif';
+            const primaryColor = window.elementSdk?.config?.primary_color || defaultConfig.primary_color;
+            const accentColor = window.elementSdk?.config?.accent_color || defaultConfig.accent_color;
+            const textColor = window.elementSdk?.config?.text_color || defaultConfig.text_color;
+            const cardBg = window.elementSdk?.config?.card_background || defaultConfig.card_background;
+            
+            grid.innerHTML = filtered.map(prop => `
+                <div class="property-card bg-white rounded-xl shadow-md overflow-hidden" style="background-color: ${cardBg};">
+                    <div class="h-48 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%);">
+                        <svg class="w-24 h-24 text-white opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                        </svg>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="px-3 py-1 rounded-full text-sm font-semibold" style="background-color: ${accentColor}; color: white; font-size: ${baseSize * 0.85}px; font-family: ${customFont}, ${baseFontStack};">
+                                ${prop.type === 'venta' ? 'Venta' : 'Alquiler'}
+                            </span>
+                            <span class="font-bold" style="color: ${primaryColor}; font-size: ${baseSize * 1.25}px; font-family: ${customFont}, ${baseFontStack};">
+                                ${prop.price}
+                            </span>
+                        </div>
+                        <h3 class="font-bold mb-2" style="color: ${textColor}; font-size: ${baseSize * 1.25}px; font-family: ${customFont}, ${baseFontStack};">
+                            ${prop.title}
+                        </h3>
+                        <p class="mb-4 opacity-75" style="color: ${textColor}; font-size: ${baseSize}px; font-family: ${customFont}, ${baseFontStack};">
+                            ${prop.description}
+                        </p>
+                        <div class="flex gap-4 text-sm mb-4" style="color: ${textColor}; font-size: ${baseSize * 0.9}px; font-family: ${customFont}, ${baseFontStack};">
+                            <span>🛏️ ${prop.beds} hab</span>
+                            <span>🚿 ${prop.baths} baños</span>
+                            <span>📐 ${prop.area}</span>
+                        </div>
+                        <button onclick="contactProperty(${prop.id})" class="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-all" style="background-color: ${primaryColor}; font-size: ${baseSize}px; font-family: ${customFont}, ${baseFontStack};">
+                            Más Información
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterProperties(city) {
+            currentCityFilter = city;
+            
+            document.querySelectorAll('[data-filter]').forEach(btn => {
+                if (btn.dataset.filter === city) {
+                    btn.classList.add('active', 'bg-white', 'text-blue-900');
+                    btn.classList.remove('bg-blue-700', 'text-white');
+                } else {
+                    btn.classList.remove('active', 'bg-white', 'text-blue-900');
+                    btn.classList.add('bg-blue-700', 'text-white');
+                }
+            });
+            
+            renderProperties();
+        }
+
+        function filterType(type) {
+            currentTypeFilter = type;
+            
+            document.querySelectorAll('[data-type]').forEach(btn => {
+                if (btn.dataset.type === type) {
+                    btn.classList.add('active', 'bg-orange-500', 'text-white');
+                    btn.classList.remove('bg-white', 'text-gray-800', 'border', 'border-gray-200');
+                } else {
+                    btn.classList.remove('active', 'bg-orange-500', 'text-white');
+                    btn.classList.add('bg-white', 'text-gray-800', 'border', 'border-gray-200');
+                }
+            });
+            
+            renderProperties();
+        }
+
+        function contactProperty(id) {
+            const prop = properties.find(p => p.id === id);
+            const phone = window.elementSdk?.config?.phone_number || defaultConfig.phone_number;
+            const message = `Hola, estoy interesado en: ${prop.title} - ${prop.price}`;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.innerHTML = `
+                <div class="bg-white rounded-xl p-8 max-w-md mx-4 shadow-2xl">
+                    <h3 class="text-2xl font-bold mb-4" style="color: ${window.elementSdk?.config?.primary_color || defaultConfig.primary_color};">Información de Contacto</h3>
+                    <p class="mb-4">Para más información sobre esta propiedad:</p>
+                    <p class="mb-2"><strong>📞 Teléfono:</strong> ${phone}</p>
+                    <p class="mb-6"><strong>✉️ Email:</strong> ${window.elementSdk?.config?.email_address || defaultConfig.email_address}</p>
+                    <button onclick="this.parentElement.parentElement.remove()" class="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800">
+                        Cerrar
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function showContactInfo() {
+            const phone = window.elementSdk?.config?.phone_number || defaultConfig.phone_number;
+            const email = window.elementSdk?.config?.email_address || defaultConfig.email_address;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.innerHTML = `
+                <div class="bg-white rounded-xl p-8 max-w-md mx-4 shadow-2xl">
+                    <h3 class="text-2xl font-bold mb-4" style="color: ${window.elementSdk?.config?.primary_color || defaultConfig.primary_color};">Contáctanos</h3>
+                    <p class="mb-6">Estamos aquí para ayudarte a encontrar tu hogar ideal</p>
+                    <p class="mb-3 text-lg"><strong>📞 Teléfono:</strong> ${phone}</p>
+                    <p class="mb-6 text-lg"><strong>✉️ Email:</strong> ${email}</p>
+                    <button onclick="this.parentElement.parentElement.remove()" class="w-full text-white py-3 rounded-lg font-semibold" style="background-color: ${window.elementSdk?.config?.accent_color || defaultConfig.accent_color};">
+                        Cerrar
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        async function onConfigChange(config) {
+            const baseSize = config.font_size || defaultConfig.font_size;
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseFontStack = 'system-ui, -apple-system, sans-serif';
+            
+            document.getElementById('site-title').textContent = config.site_title || defaultConfig.site_title;
+            document.getElementById('site-title').style.fontSize = `${baseSize * 2}px`;
+            document.getElementById('site-title').style.fontFamily = `${customFont}, ${baseFontStack}`;
+            
+            document.getElementById('tagline').textContent = config.tagline || defaultConfig.tagline;
+            document.getElementById('tagline').style.fontSize = `${baseSize * 1.25}px`;
+            document.getElementById('tagline').style.fontFamily = `${customFont}, ${baseFontStack}`;
+            
+            document.getElementById('phone-number').textContent = `📞 ${config.phone_number || defaultConfig.phone_number}`;
+            document.getElementById('phone-number').style.fontSize = `${baseSize * 1.1}px`;
+            document.getElementById('phone-number').style.fontFamily = `${customFont}, ${baseFontStack}`;
+            
+            document.getElementById('email-address').textContent = `✉️ ${config.email_address || defaultConfig.email_address}`;
+            document.getElementById('email-address').style.fontSize = `${baseSize * 0.9}px`;
+            document.getElementById('email-address').style.fontFamily = `${customFont}, ${baseFontStack}`;
+            
+            document.getElementById('contact-cta-btn').textContent = config.contact_button_text || defaultConfig.contact_button_text;
+            document.getElementById('contact-cta-btn').style.fontSize = `${baseSize * 1.1}px`;
+            document.getElementById('contact-cta-btn').style.fontFamily = `${customFont}, ${baseFontStack}`;
+            
+            if (config.background_color) {
+                document.querySelector('main').style.backgroundColor = config.background_color;
+            }
+            
+            if (config.accent_color) {
+                document.getElementById('contact-cta-btn').style.backgroundColor = config.accent_color;
+            }
+            
+            renderProperties();
+        }
+
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities: (config) => ({
+                    recolorables: [
+                        {
+                            get: () => config.background_color || defaultConfig.background_color,
+                            set: (value) => {
+                                config.background_color = value;
+                                window.elementSdk.setConfig({ background_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.card_background || defaultConfig.card_background,
+                            set: (value) => {
+                                config.card_background = value;
+                                window.elementSdk.setConfig({ card_background: value });
+                            }
+                        },
+                        {
+                            get: () => config.text_color || defaultConfig.text_color,
+                            set: (value) => {
+                                config.text_color = value;
+                                window.elementSdk.setConfig({ text_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.primary_color || defaultConfig.primary_color,
+                            set: (value) => {
+                                config.primary_color = value;
+                                window.elementSdk.setConfig({ primary_color: value });
+                            }
+                        },
+                        {
+                            get: () => config.accent_color || defaultConfig.accent_color,
+                            set: (value) => {
+                                config.accent_color = value;
+                                window.elementSdk.setConfig({ accent_color: value });
+                            }
+                        }
+                    ],
+                    borderables: [],
+                    fontEditable: {
+                        get: () => config.font_family || defaultConfig.font_family,
+                        set: (value) => {
+                            config.font_family = value;
+                            window.elementSdk.setConfig({ font_family: value });
+                        }
+                    },
+                    fontSizeable: {
+                        get: () => config.font_size || defaultConfig.font_size,
+                        set: (value) => {
+                            config.font_size = value;
+                            window.elementSdk.setConfig({ font_size: value });
+                        }
+                    }
+                }),
+                mapToEditPanelValues: (config) => new Map([
+                    ["site_title", config.site_title || defaultConfig.site_title],
+                    ["tagline", config.tagline || defaultConfig.tagline],
+                    ["phone_number", config.phone_number || defaultConfig.phone_number],
+                    ["email_address", config.email_address || defaultConfig.email_address],
+                    ["contact_button_text", config.contact_button_text || defaultConfig.contact_button_text]
+                ])
+            });
+        }
+
+        renderProperties();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a6c92fcd774cdcb',t:'MTc2NDUyOTA4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
